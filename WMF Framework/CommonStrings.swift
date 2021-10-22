@@ -47,6 +47,8 @@ public class CommonStrings: NSObject {
     @objc public static let savedTabTitle = WMFLocalizedString("saved-title", value: "Saved", comment: "Title of the saved screen shown on the saved tab {{Identical|Saved}}")
 
     @objc public static let notificationsCenterTitle = WMFLocalizedString("notifications-center-title", value: "Notifications", comment: "Title for Notifications Center interface.")
+    public static let notificationsCenterMarkAsRead = WMFLocalizedString("notifications-center-mark-as-read", value: "Mark as Read", comment: "Button text in Notifications Center to mark a notification as read.")
+    public static let notificationsCenterNotificationsSettings = WMFLocalizedString("notifications-center-notifications-settings", value: "Notification settings", comment: "Button text in Notifications Center that automatically routes to the notifications settings screen.")
 
     @objc public static let exploreFeedTitle = WMFLocalizedString("welcome-exploration-explore-feed-title", value:"Explore feed", comment:"Title for Explore feed")
     @objc public static let featuredArticleTitle = WMFLocalizedString("explore-featured-article-heading", value: "Featured article", comment: "Text for 'Featured article' header")

@@ -71,4 +71,8 @@ public class RemoteNotification: NSManagedObject {
             }
         }
     }
+    
+    public var destinationLinkHost: String? {
+        return messageLinks?.primaryURL?.host
+    }
 }

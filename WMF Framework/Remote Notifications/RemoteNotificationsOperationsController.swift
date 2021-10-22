@@ -76,7 +76,8 @@ class RemoteNotificationsOperationsController: NSObject {
 
             var projects: [RemoteNotificationsProject] = []
             for languageCode in preferredLanguageCodes {
-                projects.append(.language(languageCode, nil))
+                //TODO: is nil okay here?
+                projects.append(.language(languageCode, nil, nil))
             }
             projects.append(.commons)
             projects.append(.wikidata)

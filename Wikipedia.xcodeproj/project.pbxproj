@@ -565,6 +565,10 @@
 		678C7C3023BE7319001AC4D5 /* CacheDBWriterHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678C7C2F23BE7319001AC4D5 /* CacheDBWriterHelper.swift */; };
 		678C7C3423BE75F9001AC4D5 /* CacheFileWriterHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678C7C3323BE75F9001AC4D5 /* CacheFileWriterHelper.swift */; };
 		678C7C3623BE7779001AC4D5 /* FileManager+CacheExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678C7C3523BE7779001AC4D5 /* FileManager+CacheExtensions.swift */; };
+		678D2999272340270036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678D29942722233F0036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift */; };
+		678D299A272340280036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678D29942722233F0036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift */; };
+		678D299B272340290036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678D29942722233F0036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift */; };
+		678D299C272340290036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678D29942722233F0036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift */; };
 		678D79E4235E592F006161FF /* DiffListChangeItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678D79E3235E592F006161FF /* DiffListChangeItemViewModel.swift */; };
 		678D79EB235E5959006161FF /* DiffListChangeItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678D79E3235E592F006161FF /* DiffListChangeItemViewModel.swift */; };
 		678D79EC235E595A006161FF /* DiffListChangeItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678D79E3235E592F006161FF /* DiffListChangeItemViewModel.swift */; };
@@ -3835,6 +3839,7 @@
 		678C7C2F23BE7319001AC4D5 /* CacheDBWriterHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheDBWriterHelper.swift; sourceTree = "<group>"; };
 		678C7C3323BE75F9001AC4D5 /* CacheFileWriterHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheFileWriterHelper.swift; sourceTree = "<group>"; };
 		678C7C3523BE7779001AC4D5 /* FileManager+CacheExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+CacheExtensions.swift"; sourceTree = "<group>"; };
+		678D29942722233F0036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NotificationsCenterCellViewModel+DestinationExtensions.swift"; sourceTree = "<group>"; };
 		678D79E3235E592F006161FF /* DiffListChangeItemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffListChangeItemViewModel.swift; sourceTree = "<group>"; };
 		678D79EF235E5979006161FF /* DiffListChangeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffListChangeViewModel.swift; sourceTree = "<group>"; };
 		678D79F5235E599B006161FF /* DiffListContextViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffListContextViewModel.swift; sourceTree = "<group>"; };
@@ -5772,6 +5777,7 @@
 				00FCB2C226D839A500F5A47A /* NotificationsCenterCellViewModel.swift */,
 				6761AEE02704DE4100E47BAD /* NotificationsCenterCellViewModel+TextExtensions.swift */,
 				6761AEE52704FD3F00E47BAD /* NotificationsCenterCellViewModel+IconNameExtensions.swift */,
+				678D29942722233F0036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift */,
 				00E2EA8826E28A9700B1A741 /* NotificationsCenterCellStyle.swift */,
 				00E2EA8D26E2A45C00B1A741 /* NotificationsCenterCellDisplayState.swift */,
 			);
@@ -10871,6 +10877,7 @@
 				B0C6BE571E4526A40033BD6E /* WMFChangePasswordViewController.swift in Sources */,
 				B0C17B9921FAB060009ED5C3 /* AbuseFilterAlertView.swift in Sources */,
 				B0421AA2206991F500C22630 /* SavedTabBarItemProgressBadgeManager.swift in Sources */,
+				678D2999272340270036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift in Sources */,
 				B0F4761B21F921D300C4E254 /* EditSummaryViewController.swift in Sources */,
 				B389CFCE1E6F238300483C06 /* WMFMapsActivity.swift in Sources */,
 				7A2BB1D421F27AC5004C0FDF /* WKWebView+OffsetHack.swift in Sources */,
@@ -11747,6 +11754,7 @@
 				673411572273578A005B31DA /* TalkPageFetcher.swift in Sources */,
 				B0C17B9C21FAB060009ED5C3 /* AbuseFilterAlertView.swift in Sources */,
 				D8A42A9D1E815A9C00D8E281 /* WMFTitleInsetRespectingButton.m in Sources */,
+				678D299C272340290036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift in Sources */,
 				B0F4761E21F921D300C4E254 /* EditSummaryViewController.swift in Sources */,
 				B0421AA5206991F500C22630 /* SavedTabBarItemProgressBadgeManager.swift in Sources */,
 				7A2BB1D721F27AC5004C0FDF /* WKWebView+OffsetHack.swift in Sources */,
@@ -12620,6 +12628,7 @@
 				D8CE26191E698E2400DAE2E0 /* PageHistoryFetcher.swift in Sources */,
 				83F1096F23D0E787003F3E9E /* RandomArticleViewController.swift in Sources */,
 				7ABE17252239BB54006BA309 /* WelcomePanelViewController.swift in Sources */,
+				678D299B272340290036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift in Sources */,
 				67E8B07F226A57E400537BC9 /* TalkPageTopicCell.swift in Sources */,
 				678D79F1235E5979006161FF /* DiffListChangeViewModel.swift in Sources */,
 				D8CE261B1E698E2400DAE2E0 /* CreateAccountFunnel.m in Sources */,
@@ -13122,6 +13131,7 @@
 				D87B13A71F276B1000B27227 /* ShareActivityController.swift in Sources */,
 				83F1097023D0E787003F3E9E /* RandomArticleViewController.swift in Sources */,
 				7ABE17262239BB54006BA309 /* WelcomePanelViewController.swift in Sources */,
+				678D299A272340280036C5D9 /* NotificationsCenterCellViewModel+DestinationExtensions.swift in Sources */,
 				67E8B083226A57E600537BC9 /* TalkPageTopicCell.swift in Sources */,
 				678D79F2235E5979006161FF /* DiffListChangeViewModel.swift in Sources */,
 				D8EC3F1A1E9BDA35006712EB /* CreateAccountFunnel.m in Sources */,

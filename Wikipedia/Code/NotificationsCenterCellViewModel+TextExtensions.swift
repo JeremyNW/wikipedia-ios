@@ -31,6 +31,7 @@ extension NotificationsCenterCellViewModel {
                 return genericHeaderText(type: notification.type, project: project)
             }
             
+            //TODO: This may be wrong. AgentName of a successful mention seems to be yourself, not the person you mentioned (no clean way to pull the person you mentioned).
             return mentionText(agentName: agentName)
         case .loginFailKnownDevice,
              .loginFailUnknownDevice,
@@ -193,7 +194,7 @@ extension NotificationsCenterCellViewModel {
     
     var projectText: String? {
         switch project {
-        case .language(let languageCode, _):
+        case .language(let languageCode, _, _):
             return languageCode.uppercased()
         case .commons, .wikidata:
             return nil
@@ -213,7 +214,7 @@ private extension NotificationsCenterCellViewModel {
     func projectName(project: RemoteNotificationsProject, shouldReturnCodedFormat: Bool) -> String {
         
         switch project {
-        case .language(let languageCode, let localizedLanguageName):
+        case .language(let languageCode, let localizedLanguageName, _):
             let format = WMFLocalizedString("notifications-center-language-project-name-format", value: "%1$@ %2$@", comment: "Format used for the ordering of language project name descriptions. This description is inserted into the header text of notifications in Notifications Center. For example, \"English Wikipedia\". Use this format to reorder these words if necessary or insert additional connecting words. Parameters: %1$@ = localized language name (\"English\"), %2$@ = localized name for Wikipedia (\"Wikipedia\")")
 
             if let localizedLanguageName = localizedLanguageName,
