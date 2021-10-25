@@ -51,8 +51,9 @@ extension NotificationsCenterCellViewModel {
             return nil
         case .successfulMention:
         
-            //TODO: This may be wrong. AgentName of a successful mention seems to be yourself, not the person you mentioned (no clean way to pull the person you mentioned).
-            calculatedURL = customPrefixAgentNameURL(for: configuration, pageNamespace: .user)
+            //TODO: AgentName of a successful mention seems to be yourself, not the person you mentioned (no clean way to pull the person you mentioned). Returning nil for now.
+            //calculatedURL = customPrefixAgentNameURL(for: configuration, pageNamespace: .user)
+            return nil
         
         case .loginFailUnknownDevice,
              .loginFailKnownDevice,
