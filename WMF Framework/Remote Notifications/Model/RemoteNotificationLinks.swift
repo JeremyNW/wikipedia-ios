@@ -4,8 +4,8 @@ import Foundation
 public class RemoteNotificationLinks: NSObject, NSSecureCoding, Codable {
     public static var supportsSecureCoding: Bool = true
     
-    let primary: RemoteNotificationLink?
-    let secondary: [RemoteNotificationLink]?
+    public let primary: RemoteNotificationLink?
+    public let secondary: [RemoteNotificationLink]?
     
     public var primaryURL: URL? {
         return primary?.url
@@ -39,8 +39,8 @@ public class RemoteNotificationLink: NSObject, NSSecureCoding, Codable {
     public static var supportsSecureCoding: Bool = true
     
     let type: String?
-    let url: URL?
-    let label: String?
+    public let url: URL?
+    public let label: String?
 
     init(type: NSString?, url: URL?, label: NSString?) {
         self.type = type as String?

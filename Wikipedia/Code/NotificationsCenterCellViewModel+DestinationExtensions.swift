@@ -32,7 +32,7 @@ extension NotificationsCenterCellViewModel {
              .thanks:
             calculatedURL = fullTitleDiffURL(for: configuration)
         case .userRightsChange:
-            calculatedURL = listGroupRightsURL
+            calculatedURL = userGroupRightsURL
         case .connectionWithWikidata:
             //TODO: Doubtful that this is right, but not sure if Q identifer comes through this notification type or not.
             //If it does, use it and configuration object to build wikidata url
@@ -115,7 +115,8 @@ extension NotificationsCenterCellViewModel {
     func swipeActions(for configuration: Configuration) -> [SwipeAction] {
         
         var swipeActions: [SwipeAction] = []
-        let markAsReadActionData = SwipeActionData(text: CommonStrings.notificationsCenterMarkAsRead, destination: nil)
+        let markAsReadText = WMFLocalizedString("notifications-center-mark-as-read", value: "Mark as Read", comment: "Button text in Notifications Center to mark a notification as read.")
+        let markAsReadActionData = SwipeActionData(text: markAsReadText, destination: nil)
         swipeActions.append(.markAsRead(markAsReadActionData))
         
         switch notification.type {
@@ -124,18 +125,47 @@ extension NotificationsCenterCellViewModel {
         case .mentionInTalkPage,
              .editReverted:
             swipeActions.append(contentsOf: mentionInTalkAndEditRevertedPageActions(for: configuration))
+        case .mentionInEditSummary:
+            swipeActions.append(contentsOf: mentionInEditSummaryActions(for: configuration))
         case .successfulMention:
             swipeActions.append(contentsOf: sucessfulMentionActions(for: configuration))
         case .failedMention:
             swipeActions.append(contentsOf: failedMentionActions(for: configuration))
-
-        default:
-            //TODO: FINISH SWIPE ACTIONS
+        case .userRightsChange:
+            swipeActions.append(contentsOf: userGroupRightsActions(for: configuration))
+        case .pageReviewed:
+            swipeActions.append(contentsOf: pageReviewedActions(for: configuration))
+        case .pageLinked:
+            swipeActions.append(contentsOf: pageLinkActions(for: configuration))
+        case .connectionWithWikidata:
+            swipeActions.append(contentsOf: connectionWithWikidataActions(for: configuration))
+        case .emailFromOtherUser:
+            swipeActions.append(contentsOf: emailFromOtherUserActions(for: configuration))
+        case .thanks:
+            swipeActions.append(contentsOf: thanksActions(for: configuration))
+        case .translationMilestone,
+             .editMilestone,
+             .welcome:
             break
+        case .loginFailKnownDevice,
+             .loginFailUnknownDevice,
+             .loginSuccessUnknownDevice:
+            swipeActions.append(contentsOf: loginActions(for: configuration))
+
+        case .unknownAlert,
+             .unknownSystemAlert:
+            swipeActions.append(contentsOf: genericAlertActions(for: configuration))
+        
+        case .unknownSystemNotice,
+             .unknownNotice,
+             .unknown:
+            swipeActions.append(contentsOf: genericActions(for: configuration))
+
         }
         
         //TODO: add notification settings destination
-        let notificationSettingsActionData = SwipeActionData(text: CommonStrings.notificationsCenterNotificationsSettings, destination: nil)
+        let notificationSubscriptionSettingsText = WMFLocalizedString("notifications-center-notifications-settings", value: "Notification settings", comment: "Button text in Notifications Center that automatically routes to the notifications settings screen.")
+        let notificationSettingsActionData = SwipeActionData(text: notificationSubscriptionSettingsText, destination: nil)
         swipeActions.append(.notificationSubscriptionSettings(notificationSettingsActionData))
         
         return swipeActions
@@ -247,12 +277,12 @@ private extension NotificationsCenterCellViewModel {
         return url
     }
     
-    //https://www.mediawiki.org/wiki/Special:ListGroupRights
-    var listGroupRightsURL: URL? {
+    //https://www.mediawiki.org/wiki/Special:UserGroupRights
+    var userGroupRightsURL: URL? {
         var components = URLComponents()
         components.host = Configuration.Domain.mediaWiki
         components.scheme = "https"
-        components.path = "/wiki/Special:ListGroupRights"
+        components.path = "/wiki/Special:UserGroupRights"
         return components.url
     }
     
@@ -294,7 +324,7 @@ private extension NotificationsCenterCellViewModel {
             swipeActions.append(diffAction)
         }
         
-        if let talkPageAction = titleTalkPageAction(for: configuration, yourPhrasing: true) {
+        if let talkPageAction = titleTalkPageSwipeAction(for: configuration, yourPhrasing: true) {
             swipeActions.append(talkPageAction)
         }
         
@@ -312,11 +342,29 @@ private extension NotificationsCenterCellViewModel {
             swipeActions.append(diffAction)
         }
         
-        if let titleTalkPageAction = titleTalkPageAction(for: configuration, yourPhrasing: false) {
+        if let titleTalkPageAction = titleTalkPageSwipeAction(for: configuration, yourPhrasing: false) {
             swipeActions.append(titleTalkPageAction)
         }
         
-        if let titleAction = titleAction(for: configuration) {
+        if let titleAction = titleSwipeAction(for: configuration) {
+            swipeActions.append(titleAction)
+        }
+        
+        return swipeActions
+    }
+    
+    func mentionInEditSummaryActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+        
+        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
+            swipeActions.append(agentUserPageAction)
+        }
+        
+        if let diffAction = diffSwipeAction(for: configuration) {
+            swipeActions.append(diffAction)
+        }
+        
+        if let titleAction = titleSwipeAction(for: configuration) {
             swipeActions.append(titleAction)
         }
         
@@ -330,7 +378,7 @@ private extension NotificationsCenterCellViewModel {
             swipeActions.append(agentUserPageAction)
         }
         
-        if let titleAction = titleAction(for: configuration) {
+        if let titleAction = titleSwipeAction(for: configuration) {
             swipeActions.append(titleAction)
         }
         
@@ -338,11 +386,159 @@ private extension NotificationsCenterCellViewModel {
     }
     
     func failedMentionActions(for configuration: Configuration) -> [SwipeAction] {
-        if let titleAction = titleAction(for: configuration) {
+        if let titleAction = titleSwipeAction(for: configuration) {
             return [titleAction]
         }
         
         return []
+    }
+    
+    func userGroupRightsActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+
+        //TODO: Go to [Associated User Group's Rights Page]
+        //Not sure how to figure this out, need to see an example notifications response.
+        
+        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
+            swipeActions.append(agentUserPageAction)
+        }
+        
+        if let goToSpecialUserGroupRightsAction = userGroupRightsSwipeAction(for: configuration) {
+            swipeActions.append(goToSpecialUserGroupRightsAction)
+        }
+        
+        return swipeActions
+    }
+    
+    func pageReviewedActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+        
+        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
+            swipeActions.append(agentUserPageAction)
+        }
+        
+        if let titleAction = titleSwipeAction(for: configuration) {
+            swipeActions.append(titleAction)
+        }
+        
+        return swipeActions
+    }
+    
+    func pageLinkActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+        
+        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
+            swipeActions.append(agentUserPageAction)
+        }
+        
+        //TODO: Go to [Article you edited] or [Article where link was made]
+        //Not sure how to figure this out, need to see an example notifications response.
+        
+        if let titleAction = titleSwipeAction(for: configuration) {
+            swipeActions.append(titleAction)
+        }
+        
+        if let diffAction = diffSwipeAction(for: configuration) {
+            swipeActions.append(diffAction)
+        }
+        
+        return swipeActions
+    }
+    
+    func connectionWithWikidataActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+        
+        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
+            swipeActions.append(agentUserPageAction)
+        }
+        
+        if let titleAction = titleSwipeAction(for: configuration) {
+            swipeActions.append(titleAction)
+        }
+        
+        //TODO: Go to Wikidata item
+        //Not sure how to figure wikidata item link, need to see an example notifications response.
+        
+        return swipeActions
+    }
+    
+    func emailFromOtherUserActions(for configuration: Configuration) -> [SwipeAction] {
+        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
+            return [agentUserPageAction]
+        }
+        
+        return []
+    }
+    
+    func thanksActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+        
+        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
+            swipeActions.append(agentUserPageAction)
+        }
+        
+        if let titleAction = titleSwipeAction(for: configuration) {
+            swipeActions.append(titleAction)
+        }
+        
+        if let diffAction = diffSwipeAction(for: configuration) {
+            swipeActions.append(diffAction)
+        }
+        
+        return swipeActions
+    }
+    
+    func loginActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+        
+        if let loginHelpAction = loginNotificationsSwipeAction(for: configuration) {
+            swipeActions.append(loginHelpAction)
+        }
+        
+        if let changePasswordSwipeAction = changePasswordSwipeAction(for: configuration) {
+            swipeActions.append(changePasswordSwipeAction)
+        }
+        
+        return swipeActions
+    }
+    
+    func genericAlertActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+        
+        if let secondaryLinks = notification.messageLinks?.secondary {
+            let secondarySwipeActions = secondaryLinks.compactMap { swipeActionForGenericLink(link:$0, configuration:configuration) }
+            swipeActions.append(contentsOf: secondarySwipeActions)
+        }
+        
+        if let diffAction = diffSwipeAction(for: configuration) {
+            swipeActions.append(diffAction)
+        }
+        
+        if let primaryLink = notification.messageLinks?.primary,
+           let primarySwipeAction = swipeActionForGenericLink(link: primaryLink, configuration: configuration) {
+            swipeActions.append(primarySwipeAction)
+        }
+        
+        return swipeActions
+    }
+    
+    func genericActions(for configuration: Configuration) -> [SwipeAction] {
+        var swipeActions: [SwipeAction] = []
+        
+        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
+            swipeActions.append(agentUserPageAction)
+        }
+        
+        if let diffAction = diffSwipeAction(for: configuration) {
+            swipeActions.append(diffAction)
+        }
+        
+        if let primaryLink = notification.messageLinks?.primary,
+           let primarySwipeAction = swipeActionForGenericLink(link: primaryLink, configuration: configuration) {
+            swipeActions.append(primarySwipeAction)
+        }
+        
+        return swipeActions
     }
     
     //Go to [Username]'s user page
@@ -375,7 +571,7 @@ private extension NotificationsCenterCellViewModel {
     }
     
     //Go to [your?] talk page
-    func titleTalkPageAction(for configuration: Configuration, yourPhrasing: Bool = false) -> SwipeAction? {
+    func titleTalkPageSwipeAction(for configuration: Configuration, yourPhrasing: Bool = false) -> SwipeAction? {
         guard let url = fullTitleDiffURL(for: configuration) else {
             return nil
         }
@@ -390,16 +586,63 @@ private extension NotificationsCenterCellViewModel {
     }
     
     //Go to [Name of article]
-    func titleAction(for configuration: Configuration) -> SwipeAction? {
+    func titleSwipeAction(for configuration: Configuration) -> SwipeAction? {
         guard let url = fullTitleURL(for: configuration),
               let title = notification.titleText else {
             return nil
         }
-        
-        let format = WMFLocalizedString("notifications-center-go-to-title", value: "Go to %1$@", comment: "Button text in Notifications Center that routes to the page related to the notification. %1$@ is replaced with page title.")
-        let text = String.localizedStringWithFormat(format, title)
+
+        let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, title)
         let destination = configuration.router.destination(for: url)
         
+        let data = SwipeActionData(text: text, destination: destination)
+        return SwipeAction.custom(data)
+    }
+    
+    //Go to Special:UserGroupRights
+    func userGroupRightsSwipeAction(for configuration: Configuration) -> SwipeAction? {
+        guard let url = userGroupRightsURL else {
+            return nil
+        }
+        
+        //TODO: We should translate "Special:UserGroupRights" according to wiki.
+        //Option 1: See if we can extract it from notification's urls.
+        //Option 2: Look up Special namespace translation and UserGroupRights translation via https://es.wikipedia.org/w/api.php?action=query&format=json&meta=siteinfo&siprop=namespaces|specialpagealiases. We should update WikipediaLanguageCommandLineUtility.swift and regenerate files with this information.
+        let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, "Special:UserGroupRights")
+        let destination = configuration.router.destination(for: url)
+        let data = SwipeActionData(text: text, destination: destination)
+        return SwipeAction.custom(data)
+    }
+    
+    //Login Notifications
+    func loginNotificationsSwipeAction(for configuration: Configuration) -> SwipeAction? {
+        guard let url = loginNotificationsHelpURL else {
+            return nil
+        }
+        
+        let text = WMFLocalizedString("notifications-center-login-notifications", value: "Login Notifications", comment: "Button text in Notifications Center that routes user to login notifications help page in web view.")
+        
+        let destination = configuration.router.destination(for: url)
+        let data = SwipeActionData(text: text, destination: destination)
+        return SwipeAction.custom(data)
+    }
+    
+    //Change password
+    func changePasswordSwipeAction(for configuration: Configuration) -> SwipeAction? {
+        let text = WMFLocalizedString("notifications-center-change-password", value: "Change Password", comment: "Button text in Notifications Center that routes user to change password screen.")
+        
+        //TODO: add change password destination
+        let data = SwipeActionData(text: text, destination: nil)
+        return SwipeAction.custom(data)
+    }
+    
+    func swipeActionForGenericLink(link: RemoteNotificationLink, configuration: Configuration) -> SwipeAction? {
+        guard let url = link.url,
+              let text = link.label else {
+            return nil
+        }
+        
+        let destination = configuration.router.destination(for: url)
         let data = SwipeActionData(text: text, destination: destination)
         return SwipeAction.custom(data)
     }
