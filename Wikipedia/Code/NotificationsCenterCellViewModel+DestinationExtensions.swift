@@ -14,6 +14,8 @@ extension NotificationsCenterCellViewModel {
         let destination: Router.Destination?
     }
     
+    //MARK: Public
+    
     func primaryDestination(for configuration: Configuration) -> Router.Destination? {
 
         //First try to explicitly generate urls based on notification type to limit url side effects
@@ -185,7 +187,7 @@ private extension NotificationsCenterCellViewModel {
         let title: String? //ex: Cat
         let fullTitle: String? //ex: Talk:Cat
         let agentName: String?
-        let revisionID: Int?
+        let revisionID: String?
         let titleNamespace: PageNamespace?
         let languageVariantCode: String?
     }
@@ -201,9 +203,7 @@ private extension NotificationsCenterCellViewModel {
         let fullTitle = notification.titleFull?.denormalizedPageTitle
         let agentName = notification.agentName?.denormalizedPageTitle
         let titleNamespace = PageNamespace(namespaceValue: Int(notification.titleNamespace ?? ""))
-        
-        //TODO: add revision ID to managed object.
-        let revisionID = 1
+        let revisionID = notification.revisionID
         
         return DestinationData(host: host, wiki: wiki, title: title, fullTitle: fullTitle, agentName: agentName, revisionID: revisionID, titleNamespace: titleNamespace, languageVariantCode: project.languageVariantCode)
         
