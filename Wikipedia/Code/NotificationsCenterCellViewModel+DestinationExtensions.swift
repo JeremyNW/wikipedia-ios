@@ -11,12 +11,12 @@ extension NotificationsCenterCellViewModel {
     
     struct SwipeActionData {
         let text: String
-        let destination: Router.Destination?
+        let destinationURL: URL?
     }
     
     //MARK: Public
     
-    func primaryDestination(for configuration: Configuration) -> Router.Destination? {
+    func primaryDestinationURL(for configuration: Configuration) -> URL? {
 
         //First try to explicitly generate urls based on notification type to limit url side effects
         var calculatedURL: URL? = nil
@@ -68,14 +68,10 @@ extension NotificationsCenterCellViewModel {
         }
 
         //If unable to calculate url, default to primary url returned from server
-        if let finalPrimaryURL = (calculatedURL ?? notification.messageLinks?.primaryURL) {
-            return configuration.router.destination(for: finalPrimaryURL)
-        }
-        
-        return nil
+        return (calculatedURL ?? notification.messageLinks?.primaryURL)
     }
     
-    func secondaryDestination(for configuration: Configuration) -> Router.Destination? {
+    func secondaryDestinationURL(for configuration: Configuration) -> URL? {
         var calculatedURL: URL? = nil
         
         switch notification.type {
@@ -107,18 +103,14 @@ extension NotificationsCenterCellViewModel {
             break
         }
         
-        if let calculatedURL = calculatedURL {
-            return configuration.router.destination(for: calculatedURL)
-        }
-        
-        return nil
+        return calculatedURL
     }
     
     func swipeActions(for configuration: Configuration) -> [SwipeAction] {
         
         var swipeActions: [SwipeAction] = []
         let markAsReadText = WMFLocalizedString("notifications-center-mark-as-read", value: "Mark as Read", comment: "Button text in Notifications Center to mark a notification as read.")
-        let markAsReadActionData = SwipeActionData(text: markAsReadText, destination: nil)
+        let markAsReadActionData = SwipeActionData(text: markAsReadText, destinationURL: nil)
         swipeActions.append(.markAsRead(markAsReadActionData))
         
         switch notification.type {
@@ -167,7 +159,7 @@ extension NotificationsCenterCellViewModel {
         
         //TODO: add notification settings destination
         let notificationSubscriptionSettingsText = WMFLocalizedString("notifications-center-notifications-settings", value: "Notification settings", comment: "Button text in Notifications Center that automatically routes to the notifications settings screen.")
-        let notificationSettingsActionData = SwipeActionData(text: notificationSubscriptionSettingsText, destination: nil)
+        let notificationSettingsActionData = SwipeActionData(text: notificationSubscriptionSettingsText, destinationURL: nil)
         swipeActions.append(.notificationSubscriptionSettings(notificationSettingsActionData))
         
         return swipeActions
@@ -550,9 +542,8 @@ private extension NotificationsCenterCellViewModel {
         
         let format = WMFLocalizedString("notifications-center-go-to-user-page", value: "Go to %1$@'s user page", comment: "Button text in Notifications Center that routes to a web view of the user page of the sender that triggered the notification. %1$@ is replaced with the sender's username.")
         let text = String.localizedStringWithFormat(format, agentName)
-        let destination = configuration.router.destination(for: url)
         
-        let data = SwipeActionData(text: text, destination: destination)
+        let data = SwipeActionData(text: text, destinationURL: url)
         
         return SwipeAction.custom(data)
     }
@@ -564,9 +555,7 @@ private extension NotificationsCenterCellViewModel {
         }
         
         let text = WMFLocalizedString("notifications-center-go-to-diff", value: "Go to diff", comment: "Button text in Notifications Center that routes to a diff screen of the revision that triggered the notification.")
-        let destination = configuration.router.destination(for: url)
-        
-        let data = SwipeActionData(text: text, destination: destination)
+        let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
     
@@ -579,9 +568,7 @@ private extension NotificationsCenterCellViewModel {
         
         let text = yourPhrasing ? WMFLocalizedString("notifications-center-go-to-your-talk-page", value: "Go to your talk page", comment: "Button text in Notifications Center that routes to user's talk page.") : WMFLocalizedString("notifications-center-go-to-talk-page", value: "Go to talk page", comment: "Button text in Notifications Center that routes to a talk page.")
         
-        let destination = configuration.router.destination(for: url)
-        
-        let data = SwipeActionData(text: text, destination: destination)
+        let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
     
@@ -593,9 +580,7 @@ private extension NotificationsCenterCellViewModel {
         }
 
         let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, title)
-        let destination = configuration.router.destination(for: url)
-        
-        let data = SwipeActionData(text: text, destination: destination)
+        let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
     
@@ -609,8 +594,7 @@ private extension NotificationsCenterCellViewModel {
         //Option 1: See if we can extract it from notification's urls.
         //Option 2: Look up Special namespace translation and UserGroupRights translation via https://es.wikipedia.org/w/api.php?action=query&format=json&meta=siteinfo&siprop=namespaces|specialpagealiases. We should update WikipediaLanguageCommandLineUtility.swift and regenerate files with this information.
         let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, "Special:UserGroupRights")
-        let destination = configuration.router.destination(for: url)
-        let data = SwipeActionData(text: text, destination: destination)
+        let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
     
@@ -622,8 +606,7 @@ private extension NotificationsCenterCellViewModel {
         
         let text = WMFLocalizedString("notifications-center-login-notifications", value: "Login Notifications", comment: "Button text in Notifications Center that routes user to login notifications help page in web view.")
         
-        let destination = configuration.router.destination(for: url)
-        let data = SwipeActionData(text: text, destination: destination)
+        let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
     
@@ -632,7 +615,7 @@ private extension NotificationsCenterCellViewModel {
         let text = WMFLocalizedString("notifications-center-change-password", value: "Change Password", comment: "Button text in Notifications Center that routes user to change password screen.")
         
         //TODO: add change password destination
-        let data = SwipeActionData(text: text, destination: nil)
+        let data = SwipeActionData(text: text, destinationURL: nil)
         return SwipeAction.custom(data)
     }
     
@@ -642,8 +625,7 @@ private extension NotificationsCenterCellViewModel {
             return nil
         }
         
-        let destination = configuration.router.destination(for: url)
-        let data = SwipeActionData(text: text, destination: destination)
+        let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
 }

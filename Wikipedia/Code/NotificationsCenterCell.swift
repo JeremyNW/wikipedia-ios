@@ -315,7 +315,7 @@ final class NotificationsCenterCell: UICollectionViewCell {
         projectSourceLabel.layer.borderColor = cellStyle.projectSourceColor.cgColor
         projectSourceImage.tintColor = cellStyle.projectSourceColor
 
-        selectedBackgroundView?.backgroundColor = cellStyle.selectedCellBackgroundColor
+        //selectedBackgroundView?.backgroundColor = cellStyle.selectedCellBackgroundColor
 
         // Fonts
 

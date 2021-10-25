@@ -101,6 +101,14 @@ extension NotificationsCenterViewController: UICollectionViewDelegate, UICollect
 		cell.configure(viewModel: cellViewModel, theme: theme)
 		return cell
 	}
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cellViewModel = viewModel.cellViewModel(indexPath: indexPath),
+              let url = cellViewModel.primaryDestinationURL(for: viewModel.configuration) else {
+            return
+        }
+        self.navigate(to: url)
+    }
 
 }
 

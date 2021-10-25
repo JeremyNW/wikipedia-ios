@@ -10,6 +10,10 @@ final class NotificationsCenterViewModel: NSObject {
     // MARK: - Properties
 
     let remoteNotificationsController: RemoteNotificationsController
+    
+    var configuration: Configuration {
+        return remoteNotificationsController.configuration
+    }
 
     fileprivate let fetchedResultsController: NSFetchedResultsController<RemoteNotification>?
     fileprivate var collectionViewUpdater: CollectionViewUpdater<RemoteNotification>?
