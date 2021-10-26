@@ -96,6 +96,9 @@ class TalkPageContainerViewController: ViewController, HintPresenting {
     private var currentSourceView: UIView?
     private var currentSourceRect: CGRect?
     
+    //If populated, talk page will automatically navigate to matching reply thread after topic list loads
+    private var sectionTitleFragment: String?
+    
     lazy private(set) var fakeProgressController: FakeProgressController = {
         let progressController = FakeProgressController(progress: navigationBar, delegate: navigationBar)
         progressController.delay = 0.0
@@ -146,11 +149,12 @@ class TalkPageContainerViewController: ViewController, HintPresenting {
         }
     }
     
-    required init(title: String, siteURL: URL, type: TalkPageType, dataStore: MWKDataStore, controller: TalkPageController? = nil, theme: Theme) {
+    required init(title: String, sectionTitleFragment: String? = nil, siteURL: URL, type: TalkPageType, dataStore: MWKDataStore, controller: TalkPageController? = nil, theme: Theme) {
         self.talkPageTitle = title
         self.siteURL = siteURL
         self.type = type
         self.dataStore = dataStore
+        self.sectionTitleFragment = sectionTitleFragment
         
         if let controller = controller {
             self.controller = controller
@@ -177,17 +181,18 @@ class TalkPageContainerViewController: ViewController, HintPresenting {
     static func userTalkPageContainer(url: URL, dataStore: MWKDataStore, theme: Theme) -> TalkPageContainerViewController? {
         guard
             let title = url.wmf_title,
-            let siteURL = url.wmf_site
+            let siteURL = url.wmf_site,
+            let sectionTitleFragment = url.fragment
             else {
                 return nil
         }
-        return TalkPageContainerViewController.talkPageContainer(title: title, siteURL: siteURL, type: .user, dataStore: dataStore, theme: theme)
+        return TalkPageContainerViewController.talkPageContainer(title: title, sectionTitleFragment: sectionTitleFragment, siteURL: siteURL, type: .user, dataStore: dataStore, theme: theme)
     }
 
-    public static func talkPageContainer(title: String, siteURL: URL, type: TalkPageType, dataStore: MWKDataStore, theme: Theme) -> TalkPageContainerViewController {
+    public static func talkPageContainer(title: String, sectionTitleFragment: String? = nil, siteURL: URL, type: TalkPageType, dataStore: MWKDataStore, theme: Theme) -> TalkPageContainerViewController {
         let strippedTitle = TalkPageType.user.titleWithoutNamespacePrefix(title: title)
         let titleWithPrefix = TalkPageType.user.titleWithCanonicalNamespacePrefix(title: strippedTitle, siteURL: siteURL)
-        return TalkPageContainerViewController(title: titleWithPrefix, siteURL: siteURL, type: type, dataStore: dataStore, theme: theme)
+        return TalkPageContainerViewController(title: titleWithPrefix, sectionTitleFragment: sectionTitleFragment, siteURL: siteURL, type: type, dataStore: dataStore, theme: theme)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -376,7 +381,29 @@ private extension TalkPageContainerViewController {
             let _ = addChildViewController(childViewController: topicListViewController, belowSubview: emptyViewController.view, topAnchorPadding: 0)
             topicListViewController.delegate = self
             self.topicListViewController = topicListViewController
+            pushToSectionTitleTopicIfNeeded(with: talkPage)
         }
+    }
+    
+    func pushToSectionTitleTopicIfNeeded(with talkPage: TalkPage) {
+        
+        guard let normalizedSectionTitleFragment = sectionTitleFragment?.normalizedPageTitle,
+              let topics = talkPage.topics as? Set<TalkPageTopic> else {
+            return
+        }
+        
+        guard let matchingTopicFromNotification = topics.first(where: { topic in
+            guard let topicTitle = topic.title else {
+                return false
+            }
+            
+            return topicTitle == normalizedSectionTitleFragment
+        }) else {
+            return
+        }
+        
+        pushToReplyThread(topic: matchingTopicFromNotification, animated: true)
+        sectionTitleFragment = nil
     }
     
     func resetTopicList() {

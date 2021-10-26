@@ -24,10 +24,11 @@ extension NotificationsCenterCellViewModel {
         switch notification.type {
         case .userTalkPageMessage,
              .mentionInTalkPage,
-             .pageReviewed,
-             .pageLinked,
-             .editMilestone,
              .failedMention:
+            calculatedURL = fullTitleURL(for: configuration, appendingPrimaryLinkFragment: true)
+        case .pageReviewed,
+             .pageLinked,
+             .editMilestone:
             calculatedURL = fullTitleURL(for: configuration)
         case .mentionInEditSummary,
              .editReverted,
@@ -179,6 +180,7 @@ private extension NotificationsCenterCellViewModel {
         let wiki: String
         let title: String? //ex: Cat
         let fullTitle: String? //ex: Talk:Cat
+        let primaryLinkFragment: String?
         let agentName: String?
         let revisionID: String?
         let titleNamespace: PageNamespace?
@@ -192,13 +194,15 @@ private extension NotificationsCenterCellViewModel {
             return nil
         }
         
-        let title = notification.titleText?.denormalizedPageTitle
-        let fullTitle = notification.titleFull?.denormalizedPageTitle
-        let agentName = notification.agentName?.denormalizedPageTitle
+        let title = notification.titleText?.denormalizedPageTitle?.percentEncodedPageTitleForPathComponents
+        let fullTitle = notification.titleFull?.denormalizedPageTitle?.percentEncodedPageTitleForPathComponents
+        let agentName = notification.agentName?.denormalizedPageTitle?.percentEncodedPageTitleForPathComponents
         let titleNamespace = PageNamespace(namespaceValue: Int(notification.titleNamespace ?? ""))
         let revisionID = notification.revisionID
         
-        return DestinationData(host: host, wiki: wiki, title: title, fullTitle: fullTitle, agentName: agentName, revisionID: revisionID, titleNamespace: titleNamespace, languageVariantCode: project.languageVariantCode)
+        let primaryLinkFragment = notification.messageLinks?.primaryURL?.fragment
+        
+        return DestinationData(host: host, wiki: wiki, title: title, fullTitle: fullTitle, primaryLinkFragment: primaryLinkFragment, agentName: agentName, revisionID: revisionID, titleNamespace: titleNamespace, languageVariantCode: project.languageVariantCode)
         
     }
 }
@@ -242,7 +246,11 @@ private extension NotificationsCenterCellViewModel {
     }
     
     /// Generates a wiki url with the full (i.e. already prefixed) title from the notification
-    func fullTitleURL(for configuration: Configuration) -> URL? {
+    /// - Parameters:
+    ///   - configuration: Configuration class for building urls
+    ///   - appendingPrimaryLinkFragment: If true, appends the fragment from the primary link to generated URL
+    /// - Returns: Generated URL
+    func fullTitleURL(for configuration: Configuration, appendingPrimaryLinkFragment: Bool = false) -> URL? {
         guard let data = destinationData(for: configuration),
               let fullTitle = data.fullTitle else {
             return nil
@@ -252,7 +260,13 @@ private extension NotificationsCenterCellViewModel {
             return nil
         }
         
-        return url
+        guard appendingPrimaryLinkFragment,
+              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return url
+        }
+
+        components.fragment = data.primaryLinkFragment
+        return components.url
     }
     
     /// Generates a wiki diff url with the full (i.e. already prefixed) title from the notification
@@ -562,7 +576,7 @@ private extension NotificationsCenterCellViewModel {
     
     //Go to [your?] talk page
     func titleTalkPageSwipeAction(for configuration: Configuration, yourPhrasing: Bool = false) -> SwipeAction? {
-        guard let url = fullTitleDiffURL(for: configuration) else {
+        guard let url = fullTitleURL(for: configuration, appendingPrimaryLinkFragment: true) else {
             return nil
         }
         
