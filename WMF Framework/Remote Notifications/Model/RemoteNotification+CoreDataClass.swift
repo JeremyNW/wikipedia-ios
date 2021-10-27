@@ -72,7 +72,7 @@ public class RemoteNotification: NSManagedObject {
         }
     }
     
-    public var destinationLinkHost: String? {
+    public var primaryLinkHost: String? {
         return messageLinks?.primaryURL?.host
     }
 }

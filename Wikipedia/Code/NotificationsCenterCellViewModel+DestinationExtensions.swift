@@ -188,7 +188,7 @@ private extension NotificationsCenterCellViewModel {
     
     func destinationData(for configuration: Configuration) -> DestinationData? {
         
-        guard let host = notification.destinationLinkHost ?? configuration.defaultSiteURL.host,
+        guard let host = notification.primaryLinkHost ?? configuration.defaultSiteURL.host,
               let wiki = notification.wiki else {
             return nil
         }
@@ -278,6 +278,19 @@ private extension NotificationsCenterCellViewModel {
         }
         
         return url
+    }
+    
+    //https://en.wikipedia.org/wiki/Special:ChangeCredentials
+    func changePasswordURL(for configuration: Configuration) -> URL? {
+        guard let data = destinationData(for: configuration) else {
+            return nil
+        }
+        
+        var components = URLComponents()
+        components.host = data.host
+        components.scheme = "https"
+        components.path = "/wiki/Special:ChangeCredentials"
+        return components.url
     }
     
     //https://www.mediawiki.org/wiki/Special:UserGroupRights
@@ -623,10 +636,14 @@ private extension NotificationsCenterCellViewModel {
     
     //Change password
     func changePasswordSwipeAction(for configuration: Configuration) -> SwipeAction? {
+        
+        guard let url = changePasswordURL(for: configuration) else {
+            return nil
+        }
+        
         let text = WMFLocalizedString("notifications-center-change-password", value: "Change Password", comment: "Button text in Notifications Center that routes user to change password screen.")
         
-        //TODO: add change password destination
-        let data = SwipeActionData(text: text, destinationURL: nil)
+        let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
     
