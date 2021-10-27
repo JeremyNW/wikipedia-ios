@@ -92,12 +92,20 @@ class TalkPageContainerViewController: ViewController, HintPresenting {
     var fromNavigationStateRestoration: Bool = false
     private var cancellationKey: String?
     
-    private var currentLoadingViewController: ViewController?
-    private var currentSourceView: UIView?
-    private var currentSourceRect: CGRect?
-    
     //If populated, talk page will automatically navigate to matching reply thread after topic list loads
     private var sectionTitleFragment: String?
+    private lazy var replyRoutingOverlay: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = theme.colors.paperBackground
+        return view
+    }()
+    private lazy var replyRoutingActivityIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .medium)
+        view.color = theme.isDark ? .white : .gray
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     lazy private(set) var fakeProgressController: FakeProgressController = {
         let progressController = FakeProgressController(progress: navigationBar, delegate: navigationBar)
@@ -380,9 +388,9 @@ private extension TalkPageContainerViewController {
             topicListViewController.fromNavigationStateRestoration = fromNavigationStateRestoration
             fromNavigationStateRestoration = false
             
-            let topic = matchingTopicFromFragment(in: talkPage)
-            if topic != nil {
-                toggleTopicListDisplayDuringReplyRouting(topicListViewController: topicListViewController, show: false)
+            let fragmentTopic = matchingTopicFromFragment(in: talkPage)
+            if fragmentTopic != nil {
+                toggleReplyRoutingOverlay(show: true)
             }
             
             let _ = addChildViewController(childViewController: topicListViewController, belowSubview: emptyViewController.view, topAnchorPadding: 0)
@@ -390,23 +398,55 @@ private extension TalkPageContainerViewController {
             self.topicListViewController = topicListViewController
             
             self.sectionTitleFragment = nil
-            if let topic = topic {
-                pushToReplyThread(topic: topic, animated: true)
-                toggleTopicListDisplayDuringReplyRouting(topicListViewController: topicListViewController, show: true, delay: true)
+            if let fragmentTopic = fragmentTopic {
+                pushToReplyThread(topic: fragmentTopic, animated: false)
+                toggleReplyRoutingOverlay(show: false, delay: true)
             }
         }
     }
     
-    func toggleTopicListDisplayDuringReplyRouting(topicListViewController: TalkPageTopicListViewController, show: Bool, delay: Bool = false) {
+    func toggleReplyRoutingOverlay(show: Bool, delay: Bool = false) {
+        
+        let showBlock: () -> Void = { [weak self] in
+            
+            guard let self = self else { return }
+            
+            self.view.addSubview(self.replyRoutingOverlay)
+            self.view.wmf_addSubviewWithConstraintsToEdges(self.replyRoutingOverlay)
+            self.replyRoutingOverlay.addSubview(self.replyRoutingActivityIndicator)
+            
+            NSLayoutConstraint.activate([
+                self.replyRoutingOverlay.centerYAnchor.constraint(equalTo: self.replyRoutingActivityIndicator.centerYAnchor),
+                self.replyRoutingOverlay.centerXAnchor.constraint(equalTo: self.replyRoutingActivityIndicator.centerXAnchor)
+            ])
+            
+            self.replyRoutingActivityIndicator.startAnimating()
+        }
+        
+        let hideBlock: () -> Void = { [weak self] in
+            
+            guard let self = self else { return }
+            
+            self.replyRoutingOverlay.removeFromSuperview()
+            self.replyRoutingActivityIndicator.removeFromSuperview()
+        }
         
         if delay {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                topicListViewController.view.isHidden = !show
+                if show {
+                    showBlock()
+                } else {
+                    hideBlock()
+                }
             }
             return
         }
         
-        topicListViewController.view.isHidden = !show
+        if show {
+            showBlock()
+        } else {
+            hideBlock()
+        }
     }
     
     func matchingTopicFromFragment(in talkPage: TalkPage) -> TalkPageTopic? {
