@@ -271,22 +271,6 @@ private extension NotificationsCenterCellViewModel {
         return url
     }
     
-    //For a page link notification type (FROM page > TO page), this is the url of the TO page
-    var pageLinkToURL: URL? {
-        //Note: Sample notification json indicates that the url we want is listed as the primary URL, along with extra data in the query items.
-        //Ex. https://en.wikipedia.org/wiki/Cat?markasread=nnnnnnnn&markasreadwiki=enwiki
-        //We're returning the base url with the query items stripped.
-        
-        guard let primaryLink = notification.messageLinks?.primary,
-              let url = primaryLink.url,
-              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-            return nil
-        }
-        
-        components.queryItems?.removeAll()
-        return components.url
-    }
-    
     var connectionWithWikidataItemURL: URL? {
         
         //Note: Sample notification json indicates that the wikidata item link is the second secondary link.
@@ -332,13 +316,42 @@ private extension NotificationsCenterCellViewModel {
         return components.url
     }
     
+    var primaryLinkMinusQueryItemsURL: URL? {
+        guard let primaryLink = notification.messageLinks?.primary,
+              let url = primaryLink.url,
+              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        
+        components.queryItems?.removeAll()
+        return components.url
+    }
+    
+    //For a page link notification type (FROM page > TO page), this is the url of the TO page
+    var pageLinkToURL: URL? {
+        //Note: Sample notification json indicates that the url we want is listed as the primary URL
+        //Ex. https://en.wikipedia.org/wiki/Cat?markasread=nnnnnnnn&markasreadwiki=enwiki
+        return primaryLinkMinusQueryItemsURL
+    }
+    
     //https://www.mediawiki.org/wiki/Special:UserGroupRights
     var userGroupRightsURL: URL? {
-        var components = URLComponents()
-        components.host = Configuration.Domain.mediaWiki
-        components.scheme = "https"
-        components.path = "/wiki/Special:UserGroupRights"
+        //Note: Sample notification json indicates that translated user group link we want is listed as the primary URL
+        //Ex. https://en.wikipedia.org/wiki/Special:ListGroupRights?markasread=nnnnnnnn&markasreadwiki=enwiki#confirmed
+        
+        guard let url = primaryLinkMinusQueryItemsURL,
+              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        
+        components.fragment = nil
         return components.url
+    }
+    
+    var specificUserGroupRightsURL: URL? {
+        //Note: Sample notification json indicates that specific user group link we want is listed as the primary URL + fragment
+        //Ex. https://en.wikipedia.org/wiki/Special:ListGroupRights?markasread=nnnnnnnn&markasreadwiki=enwiki#confirmed
+        return primaryLinkMinusQueryItemsURL
     }
     
     //https://www.mediawiki.org/wiki/Help:Login_notifications
@@ -447,15 +460,16 @@ private extension NotificationsCenterCellViewModel {
     func userGroupRightsActions(for configuration: Configuration) -> [SwipeAction] {
         var swipeActions: [SwipeAction] = []
 
-        //TODO: Go to [Associated User Group's Rights Page]
-        //Not sure how to figure this out, need to see an example notifications response.
+        if let specificUserGroupRightsAction = specificUserGroupRightsSwipeAction {
+            swipeActions.append(specificUserGroupRightsAction)
+        }
         
         if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
             swipeActions.append(agentUserPageAction)
         }
         
-        if let goToSpecialUserGroupRightsAction = userGroupRightsSwipeAction(for: configuration) {
-            swipeActions.append(goToSpecialUserGroupRightsAction)
+        if let userGroupRightsAction = userGroupRightsSwipeAction(for: configuration) {
+            swipeActions.append(userGroupRightsAction)
         }
         
         return swipeActions
@@ -670,16 +684,27 @@ private extension NotificationsCenterCellViewModel {
         return SwipeAction.custom(data)
     }
     
-    //Go to Special:UserGroupRights
-    func userGroupRightsSwipeAction(for configuration: Configuration) -> SwipeAction? {
-        guard let url = userGroupRightsURL else {
+    //Go to specific Special:UserGroupRights#{Type} page
+    var specificUserGroupRightsSwipeAction: SwipeAction? {
+        guard let url = specificUserGroupRightsURL,
+              let type = url.fragment,
+              let title = url.wmf_title else {
             return nil
         }
         
-        //TODO: We should translate "Special:UserGroupRights" according to wiki.
-        //Option 1: See if we can extract it from notification's urls.
-        //Option 2: Look up Special namespace translation and UserGroupRights translation via https://es.wikipedia.org/w/api.php?action=query&format=json&meta=siteinfo&siprop=namespaces|specialpagealiases. We should update WikipediaLanguageCommandLineUtility.swift and regenerate files with this information.
-        let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, "Special:UserGroupRights")
+        let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, "\(title)#\(type)")
+        let data = SwipeActionData(text: text, destinationURL: url)
+        return SwipeAction.custom(data)
+    }
+    
+    //Go to Special:UserGroupRights
+    func userGroupRightsSwipeAction(for configuration: Configuration) -> SwipeAction? {
+        guard let url = userGroupRightsURL,
+              let title = url.wmf_title else {
+            return nil
+        }
+        
+        let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, title)
         let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
