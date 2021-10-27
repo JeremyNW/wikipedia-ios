@@ -24,9 +24,8 @@ extension NotificationsCenterCellViewModel {
         switch notification.type {
         case .userTalkPageMessage,
              .mentionInTalkPage,
-             .failedMention:
-            calculatedURL = fullTitleURL(for: configuration, appendingPrimaryLinkFragment: true)
-        case .pageReviewed,
+             .failedMention,
+             .pageReviewed,
              .pageLinked,
              .editMilestone:
             calculatedURL = fullTitleURL(for: configuration)
@@ -197,7 +196,7 @@ private extension NotificationsCenterCellViewModel {
         let title = notification.titleText?.denormalizedPageTitle?.percentEncodedPageTitleForPathComponents
         let fullTitle = notification.titleFull?.denormalizedPageTitle?.percentEncodedPageTitleForPathComponents
         let agentName = notification.agentName?.denormalizedPageTitle?.percentEncodedPageTitleForPathComponents
-        let titleNamespace = PageNamespace(namespaceValue: Int(notification.titleNamespace ?? ""))
+        let titleNamespace = PageNamespace(namespaceValue: Int(notification.titleNamespaceKey))
         let revisionID = notification.revisionID
         
         let primaryLinkFragment = notification.messageLinks?.primaryURL?.fragment
@@ -246,11 +245,7 @@ private extension NotificationsCenterCellViewModel {
     }
     
     /// Generates a wiki url with the full (i.e. already prefixed) title from the notification
-    /// - Parameters:
-    ///   - configuration: Configuration class for building urls
-    ///   - appendingPrimaryLinkFragment: If true, appends the fragment from the primary link to generated URL
-    /// - Returns: Generated URL
-    func fullTitleURL(for configuration: Configuration, appendingPrimaryLinkFragment: Bool = false) -> URL? {
+    func fullTitleURL(for configuration: Configuration) -> URL? {
         guard let data = destinationData(for: configuration),
               let fullTitle = data.fullTitle else {
             return nil
@@ -260,7 +255,8 @@ private extension NotificationsCenterCellViewModel {
             return nil
         }
         
-        guard appendingPrimaryLinkFragment,
+        guard let namespace = data.titleNamespace,
+              namespace == .userTalk,
               var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return url
         }
@@ -576,7 +572,7 @@ private extension NotificationsCenterCellViewModel {
     
     //Go to [your?] talk page
     func titleTalkPageSwipeAction(for configuration: Configuration, yourPhrasing: Bool = false) -> SwipeAction? {
-        guard let url = fullTitleURL(for: configuration, appendingPrimaryLinkFragment: true) else {
+        guard let url = fullTitleURL(for: configuration) else {
             return nil
         }
         

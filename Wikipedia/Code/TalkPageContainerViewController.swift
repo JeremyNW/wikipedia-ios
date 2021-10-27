@@ -181,11 +181,12 @@ class TalkPageContainerViewController: ViewController, HintPresenting {
     static func userTalkPageContainer(url: URL, dataStore: MWKDataStore, theme: Theme) -> TalkPageContainerViewController? {
         guard
             let title = url.wmf_title,
-            let siteURL = url.wmf_site,
-            let sectionTitleFragment = url.fragment
+            let siteURL = url.wmf_site
             else {
                 return nil
         }
+        
+        let sectionTitleFragment = url.fragment
         return TalkPageContainerViewController.talkPageContainer(title: title, sectionTitleFragment: sectionTitleFragment, siteURL: siteURL, type: .user, dataStore: dataStore, theme: theme)
     }
 
@@ -378,32 +379,54 @@ private extension TalkPageContainerViewController {
             topicListViewController.apply(theme: theme)
             topicListViewController.fromNavigationStateRestoration = fromNavigationStateRestoration
             fromNavigationStateRestoration = false
+            
+            let topic = matchingTopicFromFragment(in: talkPage)
+            if topic != nil {
+                toggleTopicListDisplayDuringReplyRouting(topicListViewController: topicListViewController, show: false)
+            }
+            
             let _ = addChildViewController(childViewController: topicListViewController, belowSubview: emptyViewController.view, topAnchorPadding: 0)
             topicListViewController.delegate = self
             self.topicListViewController = topicListViewController
-            pushToSectionTitleTopicIfNeeded(with: talkPage)
+            
+            self.sectionTitleFragment = nil
+            if let topic = topic {
+                pushToReplyThread(topic: topic, animated: true)
+                toggleTopicListDisplayDuringReplyRouting(topicListViewController: topicListViewController, show: true, delay: true)
+            }
         }
     }
     
-    func pushToSectionTitleTopicIfNeeded(with talkPage: TalkPage) {
+    func toggleTopicListDisplayDuringReplyRouting(topicListViewController: TalkPageTopicListViewController, show: Bool, delay: Bool = false) {
         
-        guard let normalizedSectionTitleFragment = sectionTitleFragment?.normalizedPageTitle,
-              let topics = talkPage.topics as? Set<TalkPageTopic> else {
+        if delay {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                topicListViewController.view.isHidden = !show
+            }
             return
         }
         
-        guard let matchingTopicFromNotification = topics.first(where: { topic in
+        topicListViewController.view.isHidden = !show
+    }
+    
+    func matchingTopicFromFragment(in talkPage: TalkPage) -> TalkPageTopic? {
+        
+        guard let normalizedSectionTitleFragment = sectionTitleFragment?.normalizedPageTitle,
+              let topics = talkPage.topics as? Set<TalkPageTopic> else {
+            return nil
+        }
+        
+        guard let matchingTopic = topics.first(where: { topic in
             guard let topicTitle = topic.title else {
                 return false
             }
             
             return topicTitle == normalizedSectionTitleFragment
         }) else {
-            return
+            return nil
         }
         
-        pushToReplyThread(topic: matchingTopicFromNotification, animated: true)
-        sectionTitleFragment = nil
+        return matchingTopic
     }
     
     func resetTopicList() {
