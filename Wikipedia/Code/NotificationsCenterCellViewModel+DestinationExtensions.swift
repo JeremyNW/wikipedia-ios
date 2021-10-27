@@ -271,6 +271,22 @@ private extension NotificationsCenterCellViewModel {
         return url
     }
     
+    //For a page link notification type (FROM page > TO page), this is the url of the TO page
+    var pageLinkToURL: URL? {
+        //Note: Sample notification json indicates that the url we want is listed as the primary URL, along with extra data in the query items.
+        //Ex. https://en.wikipedia.org/wiki/Cat?markasread=nnnnnnnn&markasreadwiki=enwiki
+        //We're returning the base url with the query items stripped.
+        
+        guard let primaryLink = notification.messageLinks?.primary,
+              let url = primaryLink.url,
+              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        
+        components.queryItems?.removeAll()
+        return components.url
+    }
+    
     var connectionWithWikidataItemURL: URL? {
         
         //Note: Sample notification json indicates that the wikidata item link is the second secondary link.
@@ -466,11 +482,14 @@ private extension NotificationsCenterCellViewModel {
             swipeActions.append(agentUserPageAction)
         }
         
-        //TODO: Go to [Article you edited] or [Article where link was made]
-        //Not sure how to figure this out, need to see an example notifications response.
-        
+        //Article you edited
         if let titleAction = titleSwipeAction(for: configuration) {
             swipeActions.append(titleAction)
+        }
+        
+        //Article where link was made
+        if let pageLinkToAction = pageLinkToAction {
+            swipeActions.append(pageLinkToAction)
         }
         
         if let diffAction = diffSwipeAction(for: configuration) {
@@ -623,6 +642,18 @@ private extension NotificationsCenterCellViewModel {
             return nil
         }
 
+        let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, title)
+        let data = SwipeActionData(text: text, destinationURL: url)
+        return SwipeAction.custom(data)
+    }
+    
+    //Go to [Article where link was made]
+    var pageLinkToAction: SwipeAction? {
+        guard let url = pageLinkToURL,
+              let title = url.wmf_title else {
+            return nil
+        }
+        
         let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, title)
         let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
