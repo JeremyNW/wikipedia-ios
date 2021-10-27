@@ -37,10 +37,7 @@ extension NotificationsCenterCellViewModel {
         case .userRightsChange:
             calculatedURL = userGroupRightsURL
         case .connectionWithWikidata:
-            //TODO: Doubtful that this is right, but not sure if Q identifer comes through this notification type or not.
-            //If it does, use it and configuration object to build wikidata url
-            //If it doesn't, might need to use the article page link to fetch the wikidata Q identifier, then build the wikidata url.
-            calculatedURL = fullTitleURL(for: configuration)
+            calculatedURL = connectionWithWikidataItemURL
         case .emailFromOtherUser:
             calculatedURL = customPrefixAgentNameURL(for: configuration, pageNamespace: .user)
         case .welcome:
@@ -274,6 +271,38 @@ private extension NotificationsCenterCellViewModel {
         return url
     }
     
+    var connectionWithWikidataItemURL: URL? {
+        
+        //Note: Sample notification json indicates that the wikidata item link is the second secondary link.
+        //Return this link if we're fairly certain it's what we think it is
+        
+        guard let secondaryLinks = notification.messageLinks?.secondary,
+              secondaryLinks.count > 1,
+              let wikidataItemURL = secondaryLinks[1].url else {
+            return nil
+        }
+        
+        //Confirm host is a Wikidata environment.
+        guard let host = wikidataItemURL.host,
+              host.contains("wikidata") else {
+            return nil
+        }
+        
+        //see if any part of path contains a Q identifier
+        let path = wikidataItemURL.path
+        let range = NSRange(location: 0, length: path.count)
+        
+        guard let regex = try? NSRegularExpression(pattern: "Q[1-9]\\d*") else {
+            return nil
+        }
+        
+        guard regex.firstMatch(in: path, options: [], range: range) != nil else {
+            return nil
+        }
+        
+        return wikidataItemURL
+    }
+    
     //https://en.wikipedia.org/wiki/Special:ChangeCredentials
     func changePasswordURL(for configuration: Configuration) -> URL? {
         guard let data = destinationData(for: configuration) else {
@@ -462,8 +491,9 @@ private extension NotificationsCenterCellViewModel {
             swipeActions.append(titleAction)
         }
         
-        //TODO: Go to Wikidata item
-        //Not sure how to figure wikidata item link, need to see an example notifications response.
+        if let wikidataItemAction = wikidataItemAction {
+            swipeActions.append(wikidataItemAction)
+        }
         
         return swipeActions
     }
@@ -594,6 +624,17 @@ private extension NotificationsCenterCellViewModel {
         }
 
         let text = String.localizedStringWithFormat(CommonStrings.notificationsCenterGoToTitleFormat, title)
+        let data = SwipeActionData(text: text, destinationURL: url)
+        return SwipeAction.custom(data)
+    }
+    
+    //Go to Wikidata item
+    var wikidataItemAction: SwipeAction? {
+        guard let url = connectionWithWikidataItemURL else {
+            return nil
+        }
+        
+        let text = WMFLocalizedString("notifications-center-go-to-wikidata-item", value: "Go to Wikidata item", comment: "Button text in Notifications Center that routes to a Wikidata item page.")
         let data = SwipeActionData(text: text, destinationURL: url)
         return SwipeAction.custom(data)
     }
