@@ -564,7 +564,6 @@
 "notifications-center-go-to-user-page" = "Go to $1's user page";
 "notifications-center-go-to-your-talk-page" = "Go to your talk page";
 "notifications-center-header-alert-from-project" = "Alert from $1";
-"notifications-center-header-mention-format" = "To: $1";
 "notifications-center-header-notice-from-project" = "Notice from $1";
 "notifications-center-language-project-name-format" = "$1 $2";
 "notifications-center-login-notifications" = "Login Notifications";

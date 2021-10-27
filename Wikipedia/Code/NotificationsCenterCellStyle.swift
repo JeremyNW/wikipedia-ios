@@ -21,7 +21,7 @@ struct NotificationsCenterCellStyle {
         }
 
         switch notificationType {
-        case .welcome, .editMilestone, .translationMilestone(_), .failedMention:
+        case .welcome, .editMilestone, .translationMilestone(_), .failedMention, .successfulMention:
             return theme.colors.primaryText
         case .loginFailKnownDevice, .loginFailUnknownDevice, .loginSuccessUnknownDevice:
             return theme.colors.error
@@ -41,6 +41,7 @@ struct NotificationsCenterCellStyle {
              .editMilestone,
              .translationMilestone,
              .failedMention,
+             .successfulMention,
              .loginFailKnownDevice,
              .loginFailUnknownDevice,
              .loginSuccessUnknownDevice:

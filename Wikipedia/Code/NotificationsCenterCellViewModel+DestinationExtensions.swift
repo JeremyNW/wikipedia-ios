@@ -27,7 +27,8 @@ extension NotificationsCenterCellViewModel {
              .failedMention,
              .pageReviewed,
              .pageLinked,
-             .editMilestone:
+             .editMilestone,
+             .successfulMention:
             calculatedURL = fullTitleURL(for: configuration)
         case .mentionInEditSummary,
              .editReverted,
@@ -48,11 +49,6 @@ extension NotificationsCenterCellViewModel {
             
             //purposefully not allowing default to primaryURL from server below
             //business requirements are that there are no destination links for translations notification.
-            return nil
-        case .successfulMention:
-        
-            //TODO: AgentName of a successful mention seems to be yourself, not the person you mentioned (no clean way to pull the person you mentioned). Returning nil for now.
-            //calculatedURL = customPrefixAgentNameURL(for: configuration, pageNamespace: .user)
             return nil
         
         case .loginFailUnknownDevice,
@@ -88,9 +84,8 @@ extension NotificationsCenterCellViewModel {
              .unknownAlert,
              .unknownNotice:
             calculatedURL = customPrefixAgentNameURL(for: configuration, pageNamespace: .user)
-        case .successfulMention:
-            calculatedURL = fullTitleURL(for: configuration)
         case .failedMention,
+             .successfulMention,
              .emailFromOtherUser,
              .translationMilestone,
              .editMilestone,
@@ -123,7 +118,7 @@ extension NotificationsCenterCellViewModel {
         case .mentionInEditSummary:
             swipeActions.append(contentsOf: mentionInEditSummaryActions(for: configuration))
         case .successfulMention:
-            swipeActions.append(contentsOf: sucessfulMentionActions(for: configuration))
+            swipeActions.append(contentsOf: successfulMentionActions(for: configuration))
         case .failedMention:
             swipeActions.append(contentsOf: failedMentionActions(for: configuration))
         case .userRightsChange:
@@ -198,8 +193,7 @@ private extension NotificationsCenterCellViewModel {
         let agentName = notification.agentName?.denormalizedPageTitle?.percentEncodedPageTitleForPathComponents
         let titleNamespace = PageNamespace(namespaceValue: Int(notification.titleNamespaceKey))
         let revisionID = notification.revisionID
-        
-        let primaryLinkFragment = notification.messageLinks?.primaryURL?.fragment
+        let primaryLinkFragment = notification.primaryLinkFragment
         
         return DestinationData(host: host, wiki: wiki, title: title, fullTitle: fullTitle, primaryLinkFragment: primaryLinkFragment, agentName: agentName, revisionID: revisionID, titleNamespace: titleNamespace, languageVariantCode: project.languageVariantCode)
         
@@ -387,12 +381,8 @@ private extension NotificationsCenterCellViewModel {
         return swipeActions
     }
     
-    func sucessfulMentionActions(for configuration: Configuration) -> [SwipeAction] {
+    func successfulMentionActions(for configuration: Configuration) -> [SwipeAction] {
         var swipeActions: [SwipeAction] = []
-        
-        if let agentUserPageAction = agentUserPageSwipeAction(for: configuration) {
-            swipeActions.append(agentUserPageAction)
-        }
         
         if let titleAction = titleSwipeAction(for: configuration) {
             swipeActions.append(titleAction)
