@@ -155,7 +155,7 @@
 "cc-zero" = "ڪريئيٽو ڪامنز سيسي0";
 "clear-title-accessibility-label" = "ختم ڪريو";
 "close-button-accessibility-label" = "بند ڪريو";
-"compass-direction" = " $1 بجي";
+"compass-direction" = "$1 وڳي";
 "continue-reading-empty-description" = "وڪيپيڊيا کي وڌيڪ مضمون پڙھڻ لاءِ کوجيو";
 "continue-reading-empty-title" = "ڪي بہ تازو پڙھيل مضمون ناھن";
 "data-migration-status" = "تجديد ڪندي...";
@@ -385,7 +385,7 @@
 "field-alert-username-unavailable" = "واھپنانءُ موجود ناھي";
 "field-backup-token-title" = "بيڪ اپ ڪوڊ";
 "field-captcha-placeholder" = "ڪيپچا متن";
-"field-captcha-title" = "مٿين جيڪا لکت ڏسو پيا اھا داخل ڪريو";
+"field-captcha-title" = "مٿيون جيڪو متن ڏسو پيا اھو داخل ڪريو";
 "field-email-placeholder" = "example@example.org";
 "field-email-title" = "برقٽپال";
 "field-email-title-optional" = "برقٽپال (اختياري)";
