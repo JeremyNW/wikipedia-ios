@@ -135,7 +135,7 @@ class CollectionViewHeader: SizeThatFitsReusableView {
 extension CollectionViewHeader: Themeable {
     func apply(theme: Theme) {
         titleLabel.textColor = theme[keyPath: titleTextColorKeyPath]
-        titleLabel.backgroundColor = theme.colors.paperBackground
+        titleLabel.backgroundColor = .systemPurple
         subtitleLabel.textColor = theme.colors.secondaryText
         subtitleLabel.backgroundColor = theme.colors.paperBackground
         backgroundColor = theme.colors.paperBackground
