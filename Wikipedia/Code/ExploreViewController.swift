@@ -228,7 +228,7 @@ class ExploreViewController: ColumnarCollectionViewController, ExploreCardViewCo
         searchBar.delegate = self
         searchBar.returnKeyType = .search
         searchBar.searchBarStyle = .minimal
-        searchBar.placeholder =  WMFLocalizedString("search-field-placeholder-text", value: "Search Wikipedia", comment: "Search field placeholder text")
+        searchBar.placeholder =  WMFLocalizedString("search-field-placeholder-text", value: "I'm Feeling Lucky", comment: "Search field placeholder text")
 
         // Disable Scribble on this placeholder text field
         if UIDevice.current.userInterfaceIdiom == .pad, #available(iOS 14.0, *) {
