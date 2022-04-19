@@ -809,7 +809,7 @@
 "share-get-directions-in-maps" = "Get Directions";
 "share-menu-item" = "Share…";
 "share-message-format" = "“$1” $2";
-"share-on-twitter-sign-off" = "via @Wikipedia";
+"share-on-twitter-sign-off" = "via Wikipedia";
 "share-open-in-maps" = "Open in Maps";
 "share-social-format" = "“$1” via Wikipedia: $2";
 "share-social-mention-format" = "“$1” via @Wikipedia: $2";
